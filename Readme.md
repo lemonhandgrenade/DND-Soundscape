@@ -1,8 +1,8 @@
 # DND Soundscape
 
 ![Soundscape Demo](assets/demo.gif)
+###### (Audio in gif from [tabletop audio](https://tabletopaudio.com/))  
 
----
 
 ## Features
 - **Node Based**: Simply drag and drop loaded files into the map and guide the cursor to play.
