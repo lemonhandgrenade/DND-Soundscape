@@ -253,9 +253,7 @@ class App(tk.Tk):
 		self._setup_style()
 		self.configure(bg=ThemeManager.Get("BG_Dark"))
 
-		self.menu_bar.configure(
-			bg=ThemeManager.Get("BG_Panel")
-		)
+		self.menu_bar.configure(bg=ThemeManager.Get("BG_Panel"))
 
 		self.file_btn.configure(
 			bg=ThemeManager.Get("BG_Panel"),

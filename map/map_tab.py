@@ -230,7 +230,7 @@ class MapTab(tk.Frame):
 			file = node_data["file_path"]
 			load_sound_async(file)
 			shared_files.append(file)
-			audio = AudioNode(file)
+			audio = AudioNode(file, True)
 			audio.enabled = node_data.get("enabled", True)
 			node = MapNode(
 				self.canvas,

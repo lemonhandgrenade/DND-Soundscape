@@ -29,20 +29,20 @@ def load_sound_async(path):
 	return None
 
 class AudioNode:
-	def __init__(self, file_path):
+	def __init__(self, file_path, is_file_load=False):
 		self.file_path = file_path
 		self.enabled = True
 		self.sound = None
 		self.channel = pygame.mixer.find_channel(True)
-		self.update()
+		self.update(is_file_load)
 
-	def update(self):
+	def update(self, is_file_load=False):
 		if self.sound is None:
-			self.sound = load_sound_async(self.file_path)
-			if self.sound:
+			if not is_file_load:
+				self.sound = load_sound_async(self.file_path)
 				self.channel.play(self.sound, loops=-1)
 				self.channel.set_volume(0.0)
-			else:													# Fallback Force Load
+			else:
 				self.sound = _load_sound_sync(self.file_path)
 				self.channel.play(self.sound, loops=-1)
 				self.channel.set_volume(0.0)
