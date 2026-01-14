@@ -98,7 +98,12 @@ class MapNode:
 		self.canvas.coords(self.node, sx-8, sy-8, sx+8, sy+8)
 		self.canvas.coords(self.text, sx + 12, sy)
 
-	def center(self):								# Get Node Center Coord
+	def center(self) -> tuple[float, float]:
+		"""Gets The Center Coord Of The Node
+
+		Returns:
+			float,float: Returns X And Y Seperately
+		"""
 		x1, y1, x2, y2 = self.canvas.coords(self.node)
 		return (x1+x2)/2, (y1+y2)/2
 
@@ -177,7 +182,12 @@ class MapCanvas(tk.Canvas):
 		# Glide Loop Every 16~ ms
 		self.after(16, self._glide_loop)
 
-	def generate_node_menu(self, enabled):
+	def generate_node_menu(self, enabled: bool):
+		"""Creates The Right Click Menu For Nodes
+
+		Args:
+			enabled (bool): Whether The Clicked Node Is Enabled
+		"""
 		self.node_menu.delete(0, "end")
 		self.node_menu.add_command(label="Radius", command=self.adjust_node_radius)
 		self.node_menu.add_separator()
@@ -188,7 +198,13 @@ class MapCanvas(tk.Canvas):
 		self.node_menu.add_separator()
 		self.node_menu.add_command(label="Delete", command=self.delete_node)
 
-	def move_cursor(self, x, y):
+	def move_cursor(self, x: float, y: float):
+		"""Sets The Target Of For The Cursor To Interp/Snap To
+
+		Args:
+			x (float): X Coord
+			y (float): Y Coord
+		"""
 		self.cursor_target_x = (x - self.offset_x) / self.scale_factor
 		self.cursor_target_y = (y - self.offset_y) / self.scale_factor
 
@@ -217,7 +233,14 @@ class MapCanvas(tk.Canvas):
 
 		self.move_cursor(event.x, event.y)
 
-	def add_node(self, x, y, file_path):
+	def add_node(self, x: float, y: float, file_path: str):
+		"""Creates And Adds A Node To The Canvas Grid
+
+		Args:
+			x (float): The Nodes X Coord
+			y (float): The Nodes Y Coord
+			file_path (str): The File Path For The Audio File
+		"""
 		audio = AudioNode(file_path)
 		node = MapNode(self, x / self.scale_factor, y / self.scale_factor, audio)
 		self.nodes.append(node)
@@ -260,7 +283,16 @@ class MapCanvas(tk.Canvas):
 			else:
 				self.itemconfig(node.text, fill=ThemeManager.Get("Text_Ghost"))
 
-	def get_node_text(self, filename, vol):
+	def get_node_text(self, filename: str, vol: float) -> str:
+		"""Creates And Returns The Text To The Right Of The Node
+
+		Args:
+			filename (str): The File Name Of The Audio
+			vol (float): The Volume Of The Node With Respect To The Cursor
+
+		Returns:
+			str: Formatted String Of Node Info
+		"""
 		if self.is_simple.get():
 			volume = int(vol * 100)
 			return f"{filename}\nVolume: {volume}"

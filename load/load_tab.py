@@ -148,13 +148,9 @@ class LoadTab(tk.Frame):
 			button.bind("<Leave>", on_leave)
 
 	def update_theme(self):
-		self.configure(
-			bg=ThemeManager.Get("BG_Panel")
-		)
+		self.configure(bg=ThemeManager.Get("BG_Panel"))
 
-		self.container.configure(
-			bg=ThemeManager.Get("BG_Panel")
-		)
+		self.container.configure(bg=ThemeManager.Get("BG_Panel"))
 
 		self.add_music.configure(
 			activebackground=ThemeManager.Get("Accent"),
@@ -162,14 +158,8 @@ class LoadTab(tk.Frame):
 			fg=ThemeManager.Get("BG_Dark"),
 		)
 
-		self.button_row.configure(
-			bg=ThemeManager.Get("BG_Panel")
-		)
+		self.button_row.configure(bg=ThemeManager.Get("BG_Panel"))
 
-		self.canvas.configure(
-			bg=ThemeManager.Get("BG_Dark")
-		)
+		self.canvas.configure(bg=ThemeManager.Get("BG_Dark"))
 
-		self.list_frame.configure(
-			bg=ThemeManager.Get("BG_Dark")
-		)
+		self.list_frame.configure(bg=ThemeManager.Get("BG_Dark"))

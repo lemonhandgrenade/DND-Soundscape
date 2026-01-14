@@ -1,4 +1,8 @@
 from concurrent.futures import ThreadPoolExecutor
+
+from os import environ
+environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+
 import pygame
 
 pygame.mixer.init()

@@ -3,7 +3,7 @@ import json
 
 from utils.alerts import AlertManager
 
-class ThemeManager:
+class ThemeManager():
 	_instance = None
 
 	def __init__(self):
@@ -18,17 +18,23 @@ class ThemeManager:
 		self._load_config()
 
 	@classmethod
-	def Get(cls, key=None, default=None):
+	def Get(cls, key=None, default="#FF0000") -> str | None:
+		"""Gets The ThemeManager Or A Theme Color With Fallback
+
+		Args:
+			key (str, optional): The Key Of The Color In The Theme. Defaults to None.
+			default (str, optional): The Fallback Color If The Color Isn't Found In The Theme. Defaults to None.
+
+		Returns:
+			str | None: Returns Either ThemeManager Or A String With A Hex Color Code
+		"""
 		if cls._instance is None:
 			cls._instance = cls()
 
 		if key is None:
 			return cls._instance
 
-		if default is not None:
-			return cls._instance._get_value(key, default)
-		else:
-			return cls._instance._get_value(key, "#FF0000")
+		return cls._instance._get_value(key, default)
 
 	def _load_themes(self):
 		self.themes.clear()

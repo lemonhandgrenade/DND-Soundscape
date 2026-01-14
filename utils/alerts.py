@@ -18,13 +18,22 @@ class AlertManager:
 		return cls._instance
 	
 	def CreateAlert(self, message: str):
+		"""This Function Creates A Generic MessageBox Alert
+
+		Args:
+			message (str): The Alert Message
+		"""
 		self._show_popup(message, "Alert", icon="info")
 
 	def CreateWarning(self, message: str):
+		"""This Function Create A Generic MessageBox Warning
+
+		Args:
+			message (str): The Warning Message
+		"""
 		self._show_popup(message, "Warning", icon="warning")
 
 	def _show_popup(self, message: str, title: str, icon: str):
-
 		def popup():
 			root = tk.Tk()
 			root.withdraw()
