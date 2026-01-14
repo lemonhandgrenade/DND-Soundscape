@@ -4,7 +4,8 @@ import gzip
 
 from map.map_canvas import MapCanvas, MapNode
 from audio_engine import AudioNode, load_sound_async
-from theme import *
+from utils.theme import *
+from utils.alerts import AlertManager
 
 class MapTab(tk.Frame):
 	def __init__(self, parent, shared_files):
@@ -211,37 +212,41 @@ class MapTab(tk.Frame):
 			json.dump(data, f)
 
 	def load_map(self, file_path, shared_files):
-		with gzip.open(file_path, "r") as f:
-			data = json.load(f)
+		try:
+			with gzip.open(file_path, "r") as f:
+				data = json.load(f)
 
-		for node in self.canvas.nodes[:]:
-			node.audio_node.channel.stop()
-			self.delete(node.node)
-			self.delete(node.circle)
-			self.delete(node.text)
-		self.canvas.nodes.clear()
+			for node in self.canvas.nodes[:]:
+				node.audio_node.channel.stop()
+				self.delete(node.node)
+				self.delete(node.circle)
+				self.delete(node.text)
+			self.canvas.nodes.clear()
 
-		self.canvas.cursor_x = data["cursor"]["x"]
-		self.canvas.cursor_y = data["cursor"]["y"]
-		self.canvas.cursor_target_x = self.canvas.cursor_x
-		self.canvas.cursor_target_y = self.canvas.cursor_y
+			self.canvas.cursor_x = data["cursor"]["x"]
+			self.canvas.cursor_y = data["cursor"]["y"]
+			self.canvas.cursor_target_x = self.canvas.cursor_x
+			self.canvas.cursor_target_y = self.canvas.cursor_y
 
-		for node_data in data["nodes"]:
-			file = node_data["file_path"]
-			load_sound_async(file)
-			shared_files.append(file)
-			audio = AudioNode(file, True)
-			audio.enabled = node_data.get("enabled", True)
-			node = MapNode(
-				self.canvas,
-				node_data["x"],
-				node_data["y"],
-				audio,
-				radius=node_data.get("radius", 120)
-			)
-			self.canvas.nodes.append(node)
+			for node_data in data["nodes"]:
+				file = node_data["file_path"]
+				load_sound_async(file)
+				shared_files.append(file)
+				audio = AudioNode(file, True)
+				audio.enabled = node_data.get("enabled", True)
+				node = MapNode(
+					self.canvas,
+					node_data["x"],
+					node_data["y"],
+					audio,
+					radius=node_data.get("radius", 120)
+				)
+				self.canvas.nodes.append(node)
 
-		self.canvas.update_all_positions()
+			self.canvas.update_all_positions()
+		except:
+			AlertManager.Get().CreateWarning("The File Could Not Be Loaded, It May Be Corrupted")
+
 
 	def remove_file(self, file_path):						# Remove File
 		self.canvas.remove_nodes_with_file(file_path)

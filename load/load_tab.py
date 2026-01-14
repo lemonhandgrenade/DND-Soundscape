@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from threading import Thread
-from theme import *
+from utils.theme import *
 from audio_engine import load_sound_async
 
 

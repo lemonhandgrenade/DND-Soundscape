@@ -1,6 +1,8 @@
 import os
 import json
 
+from utils.alerts import AlertManager
+
 class ThemeManager:
 	_instance = None
 
@@ -48,7 +50,7 @@ class ThemeManager:
 					self.themes[name] = data
 
 			except Exception as e:
-				print(f"Failed To Load Theme {file}: {e}")
+				AlertManager.Get().CreateAlert(f"Failed To Load Theme {file}: {e}")
 
 	def _get_value(self, key, default=None):
 		colors = self.current_theme.get("colors", {})
@@ -91,7 +93,7 @@ class ThemeManager:
 					f
 				)
 		except Exception as e:
-			print(f"Failed To Save Options: {e}")
+			AlertManager.Get().CreateAlert(f"Failed To Save Options: {e}")
 
 	def reload(self):
 		self._load_themes()

@@ -1,10 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
-import os
-import json
 from load.load_tab import LoadTab
 from map.map_tab import MapTab
-from theme import *
+from utils.theme import *
 
 class App(tk.Tk):
 	def __init__(self):

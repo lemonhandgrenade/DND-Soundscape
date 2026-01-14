@@ -1,8 +1,8 @@
 import tkinter as tk
 import math
-from threading import Thread
+
 from audio_engine import AudioNode
-from theme import *
+from utils.theme import *
 
 class MapNode:
 	def __init__(self, canvas, x, y, audio_node, radius=120):
