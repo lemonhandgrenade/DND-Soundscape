@@ -196,8 +196,15 @@ class App(tk.Tk):
 
 		win = tk.Toplevel(self)
 		win.title("Select Theme")
-		win.geometry("300x150")
-		win.configure(bg=ThemeManager.Get("Panel", ThemeManager.Get("BG_Panel")))
+
+		screen_width = self.winfo_screenwidth()
+		screen_height = self.winfo_screenheight()
+
+		cx = int((screen_width / 2) - 150)
+		cy = int((screen_height / 2) - 50)
+
+		win.geometry(f"300x100+{cx}+{cy}")
+		win.configure(bg=ThemeManager.Get("BG_Panel"))
 		win.transient(self)
 		win.grab_set()
 
@@ -212,7 +219,7 @@ class App(tk.Tk):
 
 		selected = tk.StringVar(value=tm.current_theme_name)
 
-		ttk.Label(win, text="Theme").pack(pady=(15, 5))
+		ttk.Label(win, text="Theme", background=ThemeManager.Get("BG_Panel"), foreground=ThemeManager.Get("Text")).pack(pady=(5, 5))
 
 		box = ttk.Combobox(
 			win,
@@ -228,7 +235,15 @@ class App(tk.Tk):
 			self.apply_theme()
 			win.destroy()
 
-		tk.Button(win, text="Apply", command=apply).pack(pady=15)
+		tk.Button(
+			win,
+			text="Apply",
+			bg=ThemeManager.Get("Accent"),
+			fg=ThemeManager.Get("BG_Dark"),
+			activebackground=ThemeManager.Get("Accent"),
+			relief="flat",
+			command=apply
+		).pack(pady=5)
 
 	def apply_theme(self):
 		theme = ThemeManager.Get().current_theme
