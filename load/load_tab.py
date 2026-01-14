@@ -13,7 +13,7 @@ class LoadTab(tk.Frame):
 		self.remove_file = remove_file
 		self.refresh_all = refresh
 
-		# Scrollable container
+		# Scrollable Container For Loaded Files
 		container = tk.Frame(self, bg=BG_PANEL)
 		container.pack(fill="both", expand=True, padx=10, pady=10)
 
@@ -35,7 +35,7 @@ class LoadTab(tk.Frame):
 		self.canvas.pack(side="left", fill="both", expand=True)
 
 		self.list_frame = tk.Frame(self.canvas, bg=BG_DARK)
-		# self.canvas.create_window((0, 0), window=self.list_frame, anchor="nw")
+		
 		self.window_id = self.canvas.create_window(
 			(0, 0),
 			window=self.list_frame,

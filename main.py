@@ -8,7 +8,7 @@ from theme import *
 class App(tk.Tk):
 	def __init__(self):
 		super().__init__()
-		self.title("Sound Scape")
+		self.title("DND Soundscape")
 
 		screen_width = self.winfo_screenwidth()
 		screen_height = self.winfo_screenheight()
@@ -53,10 +53,10 @@ class App(tk.Tk):
 		style.configure(
 			"Vertical.TScrollbar",
 			gripcount=0,
-			background=GRID_COLOR,      # Thumb color
+			background=GRID_COLOR,
 			darkcolor=BG_DARK,
 			lightcolor=BG_PANEL,
-			troughcolor=BG_DARK,    # Track background
+			troughcolor=BG_DARK,
 			bordercolor=BG_PANEL,
 			arrowcolor=BG_PANEL,
 			relief="flat",
