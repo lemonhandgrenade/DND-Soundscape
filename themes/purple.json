@@ -1,0 +1,14 @@
+{
+	"name": "Purple",
+	"colors": {
+		"Accent": "#8000ff",
+		"BG_Dark": "#1e1e1e",
+		"BG_Panel": "#252526",
+		"Close_Red": "#ec273f",
+		"Grid_Color": "#333333",
+		"Link_Line": "#8c92ff",
+		"Node_Circle": "#a947ff",
+		"Text": "#d4d4d4",
+		"Text_Ghost": "#888888"
+	}
+}

@@ -8,12 +8,12 @@ from theme import *
 
 class MapTab(tk.Frame):
 	def __init__(self, parent, shared_files):
-		super().__init__(parent, bg=BG_PANEL)
+		super().__init__(parent, bg=ThemeManager.Get("BG_Panel"))
 		self.shared_files = shared_files
 		
 		# Left Side
-		left_panel = tk.Frame(self, bg=BG_PANEL)
-		left_panel.pack(side="left", fill="y")
+		self.left_panel = tk.Frame(self, bg=ThemeManager.Get("BG_Panel"))
+		self.left_panel.pack(side="left", fill="y")
 
 		# Search Bar
 		self.filtered_files = list(shared_files)
@@ -21,11 +21,11 @@ class MapTab(tk.Frame):
 		self.search_var.trace_add("write", self.update_search)
 
 		self.search_entry = tk.Entry(
-			left_panel,
+			self.left_panel,
 			textvariable=self.search_var,
-			bg=BG_DARK,
-			fg=FG_TEXT,
-			insertbackground=FG_TEXT,
+			bg=ThemeManager.Get("BG_Dark"),
+			fg=ThemeManager.Get("Text"),
+			insertbackground=ThemeManager.Get("Text"),
 			takefocus=0,
 			relief="flat",
 			font=("Segoe UI", 10)
@@ -34,11 +34,11 @@ class MapTab(tk.Frame):
 
 		# Loaded MP3 Paths
 		self.sidebar = tk.Listbox(
-			left_panel,
+			self.left_panel,
 			width=30,
-			bg=BG_DARK,
-			fg=FG_TEXT,
-			selectbackground=ACCENT,
+			bg=ThemeManager.Get("BG_Dark"),
+			fg=ThemeManager.Get("Text"),
+			selectbackground=ThemeManager.Get("Accent"),
 			highlightthickness=0,
 			border=0,
 			activestyle='none'
@@ -58,43 +58,43 @@ class MapTab(tk.Frame):
 		self.canvas.pack(side="right", fill="both", expand=True)
 
 		# Snap To Grid Checkbox
-		grid_snap_check = tk.Checkbutton(
+		self.grid_snap_check = tk.Checkbutton(
 			self,
 			text="Snap to Grid",
 			variable=self.canvas.snap_to_grid,
-			bg=BG_PANEL,
-			fg=FG_TEXT,
-			selectcolor=BG_PANEL,
-			activebackground=BG_PANEL,
-			activeforeground=ACCENT
+			bg=ThemeManager.Get("BG_Panel"),
+			fg=ThemeManager.Get("Text"),
+			selectcolor=ThemeManager.Get("BG_Panel"),
+			activebackground=ThemeManager.Get("BG_Panel"),
+			activeforeground=ThemeManager.Get("Accent")
 		)
-		grid_snap_check.pack(anchor="nw", padx=10, pady=2)
+		self.grid_snap_check.pack(anchor="nw", padx=10, pady=2)
 
 		# Cursor Interp Checkbox
-		glide_check = tk.Checkbutton(
+		self.glide_check = tk.Checkbutton(
 			self,
 			text="Glide",
 			variable=self.canvas.glide_enabled,
-			bg=BG_PANEL,
-			fg=FG_TEXT,
-			selectcolor=BG_PANEL,
-			activebackground=BG_PANEL,
-			activeforeground=ACCENT
+			bg=ThemeManager.Get("BG_Panel"),
+			fg=ThemeManager.Get("Text"),
+			selectcolor=ThemeManager.Get("BG_Panel"),
+			activebackground=ThemeManager.Get("BG_Panel"),
+			activeforeground=ThemeManager.Get("Accent")
 		)
-		glide_check.pack(anchor="nw", padx=10, pady=2)
+		self.glide_check.pack(anchor="nw", padx=10, pady=2)
 
 		# Simple Debug Info
-		simple_ui_check = tk.Checkbutton(
+		self.simple_ui_check = tk.Checkbutton(
 			self,
 			text="Simple Debug UI",
 			variable=self.canvas.is_simple,
-			bg=BG_PANEL,
-			fg=FG_TEXT,
-			selectcolor=BG_PANEL,
-			activebackground=BG_PANEL,
-			activeforeground=ACCENT
+			bg=ThemeManager.Get("BG_Panel"),
+			fg=ThemeManager.Get("Text"),
+			selectcolor=ThemeManager.Get("BG_Panel"),
+			activebackground=ThemeManager.Get("BG_Panel"),
+			activeforeground=ThemeManager.Get("Accent")
 		)
-		simple_ui_check.pack(anchor="nw", padx=10, pady=2)
+		self.simple_ui_check.pack(anchor="nw", padx=10, pady=2)
 
 		# Binds For List Drag And Drop
 		self.sidebar.bind("<ButtonPress-1>", self.start_drag)
@@ -114,8 +114,8 @@ class MapTab(tk.Frame):
 		self.drag_label = tk.Label(
 			self.winfo_toplevel(),
 			text=filename,
-			bg=ACCENT,
-			fg=BG_DARK,
+			bg=ThemeManager.Get("Accent"),
+			fg=ThemeManager.Get("BG_Dark"),
 			font=("Segoe UI", 9, "bold"),
 			padx=10,
 			pady=4,
@@ -186,13 +186,13 @@ class MapTab(tk.Frame):
 	def add_ghost_text(self, event):
 		if self.search_entry.get() == '':
 			self.search_entry.insert(0, 'Search...')
-			self.search_entry.config(fg = FG_TEXT_GHOST)
+			self.search_entry.config(fg=ThemeManager.Get("Text_Ghost"))
 
 	def remove_ghost_text(self, event):
 		if self.search_entry.get() == 'Search...':
 			self.search_entry.delete(0, "end")
 			self.search_entry.insert(0, '')
-			self.search_entry.config(fg = FG_TEXT)
+			self.search_entry.config(fg=ThemeManager.Get("Text"))
 
 	def save_map(self, file_path):
 		data = {
@@ -254,3 +254,45 @@ class MapTab(tk.Frame):
 			self.sidebar.delete(0, tk.END)
 			for f in self.shared_files:
 				self.sidebar.insert(tk.END, "    " + f.split("/")[-1])
+
+	def update_theme(self):
+		self.configure(
+			bg=ThemeManager.Get("BG_Panel")
+		)
+
+		self.left_panel.configure(bg=ThemeManager.Get("BG_Panel"))
+
+		self.sidebar.configure(
+			bg=ThemeManager.Get("BG_Dark"),
+			selectbackground=ThemeManager.Get("Accent"),
+			fg=ThemeManager.Get("Text")
+		)
+		self.grid_snap_check.configure(
+			activeforeground=ThemeManager.Get("Accent"),
+			bg=ThemeManager.Get("BG_Panel"),
+			selectcolor=ThemeManager.Get("BG_Panel"),
+			activebackground=ThemeManager.Get("BG_Panel"),
+			fg=ThemeManager.Get("Text"),
+		)
+		self.glide_check.configure(
+			activeforeground=ThemeManager.Get("Accent"),
+			bg=ThemeManager.Get("BG_Panel"),
+			selectcolor=ThemeManager.Get("BG_Panel"),
+			activebackground=ThemeManager.Get("BG_Panel"),
+			fg=ThemeManager.Get("Text"),
+		)
+		self.simple_ui_check.configure(
+			activeforeground=ThemeManager.Get("Accent"),
+			bg=ThemeManager.Get("BG_Panel"),
+			selectcolor=ThemeManager.Get("BG_Panel"),
+			activebackground=ThemeManager.Get("BG_Panel"),
+			fg=ThemeManager.Get("Text"),
+		)
+
+		self.search_entry.configure(
+			bg=ThemeManager.Get("BG_Dark"),
+			fg=ThemeManager.Get("Text"),
+			insertbackground=ThemeManager.Get("Text")
+		)
+
+		self.canvas.update_theme()

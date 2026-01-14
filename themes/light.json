@@ -1,0 +1,14 @@
+{
+	"name": "Light",
+	"colors": {
+		"Accent": "#ff8c00",
+		"BG_Dark": "#f3f3f3",
+		"BG_Panel": "#ffffff",
+		"Close_Red": "#d83b3b",
+		"Grid_Color": "#d0d0d0",
+		"Link_Line": "#ff8c8c",
+		"Node_Circle": "#ffb347",
+		"Text": "#1e1e1e",
+		"Text_Ghost": "#6e6e6e"
+	}
+}

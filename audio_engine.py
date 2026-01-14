@@ -42,6 +42,11 @@ class AudioNode:
 			if self.sound:
 				self.channel.play(self.sound, loops=-1)
 				self.channel.set_volume(0.0)
+			else:													# Fallback Force Load
+				self.sound = _load_sound_sync(self.file_path)
+				self.channel.play(self.sound, loops=-1)
+				self.channel.set_volume(0.0)
+
 
 	def set_volume(self, volume):
 		if self.channel:

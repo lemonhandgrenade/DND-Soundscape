@@ -8,23 +8,23 @@ from audio_engine import load_sound_async
 
 class LoadTab(tk.Frame):
 	def __init__(self, parent, shared_files, remove_file, refresh):
-		super().__init__(parent, bg=BG_PANEL)
+		super().__init__(parent, bg=ThemeManager.Get("BG_Panel"))
 		self.shared_files = shared_files
 		self.remove_file = remove_file
 		self.refresh_all = refresh
 
 		# Scrollable Container For Loaded Files
-		container = tk.Frame(self, bg=BG_PANEL)
-		container.pack(fill="both", expand=True, padx=10, pady=10)
+		self.container = tk.Frame(self, bg=ThemeManager.Get("BG_Panel"))
+		self.container.pack(fill="both", expand=True, padx=10, pady=10)
 
 		self.canvas = tk.Canvas(
-			container,
-			bg=BG_DARK,
+			self.container,
+			bg=ThemeManager.Get("BG_Dark"),
 			highlightthickness=0
 		)
 
 		self.scrollbar = ttk.Scrollbar(
-			container,
+			self.container,
 			orient="vertical",
 			command=self.canvas.yview,
 			style="Vertical.TScrollbar"
@@ -34,7 +34,7 @@ class LoadTab(tk.Frame):
 		self.scrollbar.pack(side="right", fill="y")
 		self.canvas.pack(side="left", fill="both", expand=True)
 
-		self.list_frame = tk.Frame(self.canvas, bg=BG_DARK)
+		self.list_frame = tk.Frame(self.canvas, bg=ThemeManager.Get("BG_Dark"))
 		
 		self.window_id = self.canvas.create_window(
 			(0, 0),
@@ -56,18 +56,19 @@ class LoadTab(tk.Frame):
 		)
 
 		# Buttons Row
-		button_row = tk.Frame(self, bg=BG_PANEL)
-		button_row.pack(pady=5)
+		self.button_row = tk.Frame(self, bg=ThemeManager.Get("BG_Panel"))
+		self.button_row.pack(pady=5)
 
-		tk.Button(
-			button_row,
+		self.add_music = tk.Button(
+			self.button_row,
 			text="Add Music",
-			bg=ACCENT,
-			fg=BG_DARK,
-			activebackground=ACCENT,
+			bg=ThemeManager.Get("Accent"),
+			fg=ThemeManager.Get("BG_Dark"),
+			activebackground=ThemeManager.Get("Accent"),
 			relief="flat",
 			command=self.add_file
-		).pack(side="left", padx=5)
+		)
+		self.add_music.pack(side="left", padx=5)
 
 		self.canvas.bind("<Enter>", self.bind_mousewheel)
 		self.canvas.bind("<Leave>", self.unbind_mousewheel)
@@ -112,14 +113,14 @@ class LoadTab(tk.Frame):
 
 		# Rebuild File Lists
 		for file_path in self.shared_files:
-			row = tk.Frame(self.list_frame, bg=BG_DARK)
+			row = tk.Frame(self.list_frame, bg=ThemeManager.Get("BG_Dark"))
 			row.pack(fill="x", pady=2)
 
 			label = tk.Label(
 				row,
 				text=file_path,
-				bg=BG_DARK,
-				fg=FG_TEXT,
+				bg=ThemeManager.Get("BG_Dark"),
+				fg=ThemeManager.Get("Text"),
 				anchor="w",
 				font=("Segoe UI", 11)
 			)
@@ -128,20 +129,47 @@ class LoadTab(tk.Frame):
 			button = tk.Button(
 				row,
 				text="✕",
-				bg=BG_DARK,
-				fg=FG_TEXT,
-				activebackground=CLOSE_RED,
-				activeforeground=FG_TEXT,
+				bg=ThemeManager.Get("BG_Dark"),
+				fg=ThemeManager.Get("Text"),
+				activebackground=ThemeManager.Get("Close_Red"),
+				activeforeground=ThemeManager.Get("Text"),
 				bd=0,
 				command=lambda p=file_path: self.remove_file_clicked(p)
 			)
 			button.pack(side="right", padx=6)
 
 			def on_enter(self, b=button):
-				b.configure(bg=CLOSE_RED, fg=FG_TEXT)
+				b.configure(bg=ThemeManager.Get("Close_Red"), fg=ThemeManager.Get("Text"))
 
 			def on_leave(self, b=button):
-				b.configure(bg=BG_DARK, fg=FG_TEXT)
+				b.configure(bg=ThemeManager.Get("BG_Dark"), fg=ThemeManager.Get("Text"))
 
 			button.bind("<Enter>", on_enter)
 			button.bind("<Leave>", on_leave)
+
+	def update_theme(self):
+		self.configure(
+			bg=ThemeManager.Get("BG_Panel")
+		)
+
+		self.container.configure(
+			bg=ThemeManager.Get("BG_Panel")
+		)
+
+		self.add_music.configure(
+			activebackground=ThemeManager.Get("Accent"),
+			bg=ThemeManager.Get("Accent"),
+			fg=ThemeManager.Get("BG_Dark"),
+		)
+
+		self.button_row.configure(
+			bg=ThemeManager.Get("BG_Panel")
+		)
+
+		self.canvas.configure(
+			bg=ThemeManager.Get("BG_Dark")
+		)
+
+		self.list_frame.configure(
+			bg=ThemeManager.Get("BG_Dark")
+		)

@@ -9,6 +9,9 @@ __pycache__/
 # Build output
 output/
 
+# Options
+options.json
+
 # Distribution / packaging
 .Python
 build/

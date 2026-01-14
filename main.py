@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
-
+import os
+import json
 from load.load_tab import LoadTab
 from map.map_tab import MapTab
 from theme import *
@@ -17,10 +18,9 @@ class App(tk.Tk):
 		cy = int((screen_height / 2) - 300)
 
 		self.geometry(f"900x600+{cx}+{cy}")
-		self.configure(bg="#1e1e1e")
+		self.configure(bg=ThemeManager.Get("BG_Dark"))
 
 		self.loaded_files = []
-		# self.overrideredirect(True)
 
 		self._setup_style()
 		self.create_custom_menu()
@@ -34,31 +34,31 @@ class App(tk.Tk):
 		style = ttk.Style()
 		style.theme_use("default")
 
-		style.configure("TNotebook", background=BG_PANEL, borderwidth=0)
+		style.configure("TNotebook", background=ThemeManager.Get("BG_Panel"), borderwidth=0)
 
 		style.configure(
 			"TNotebook.Tab",
-			background=BG_DARK,
-			foreground=FG_TEXT,
+			background=ThemeManager.Get("BG_Dark"),
+			foreground=ThemeManager.Get("Text"),
 			padding=[20, 8],
 			borderwidth=0,
 		)
 
 		style.map(
 			"TNotebook.Tab",
-			background=[("selected", BG_PANEL)],
-			foreground=[("selected", ACCENT)],
+			background=[("selected", ThemeManager.Get("BG_Panel"))],
+			foreground=[("selected", ThemeManager.Get("Accent"))],
 		)
 
 		style.configure(
 			"Vertical.TScrollbar",
 			gripcount=0,
-			background=GRID_COLOR,
-			darkcolor=BG_DARK,
-			lightcolor=BG_PANEL,
-			troughcolor=BG_DARK,
-			bordercolor=BG_PANEL,
-			arrowcolor=BG_PANEL,
+			background=ThemeManager.Get("Grid_Color"),
+			darkcolor=ThemeManager.Get("BG_Dark"),
+			lightcolor=ThemeManager.Get("BG_Panel"),
+			troughcolor=ThemeManager.Get("BG_Dark"),
+			bordercolor=ThemeManager.Get("BG_Panel"),
+			arrowcolor=ThemeManager.Get("BG_Panel"),
 			relief="flat",
 			borderwidth=0,
 			width=10
@@ -66,7 +66,7 @@ class App(tk.Tk):
 
 		style.map(
 			"Vertical.TScrollbar",
-			background=[("active", BG_DARK)]
+			background=[("active", ThemeManager.Get("BG_Dark"))]
 		)
 
 	def _setup_tabs(self):
@@ -115,62 +115,59 @@ class App(tk.Tk):
 		self.load_tab.refresh()
 
 	def create_custom_menu(self):
-		self.menu_bar = tk.Frame(self, bg=BG_PANEL, height=30)
+		self.menu_bar = tk.Frame(self, bg=ThemeManager.Get("BG_Panel"), height=30)
 		self.menu_bar.pack(fill="x", side="top")
 
-		file_btn = tk.Menubutton(
+		self.file_btn = tk.Menubutton(
 			self.menu_bar,
 			text="File",
-			bg=BG_PANEL,
-			fg=FG_TEXT,
-			activebackground=BG_DARK,
-			activeforeground=ACCENT,
+			bg=ThemeManager.Get("BG_Panel"),
+			fg=ThemeManager.Get("Text"),
+			activebackground=ThemeManager.Get("BG_Dark"),
+			activeforeground=ThemeManager.Get("Accent"),
 			font=("Segoe UI", 10, "bold"),
 		)
-		file_btn.pack(side="left", padx=5, pady=2)
+		self.file_btn.pack(side="left", padx=5, pady=2)
 
-		file_menu = tk.Menu(
-			file_btn,
+		self.file_menu = tk.Menu(
+			self.file_btn,
 			tearoff=0,
-			bg=BG_DARK,
-			fg=FG_TEXT,
-			activebackground=ACCENT,
-			activeforeground=BG_DARK,
+			bg=ThemeManager.Get("BG_Dark"),
+			fg=ThemeManager.Get("Text"),
+			activebackground=ThemeManager.Get("Accent"),
+			activeforeground=ThemeManager.Get("BG_Dark"),
 		)
 
-		file_menu.add_command(label="Save", command=self.save_map)
-		file_menu.add_command(label="Load", command=self.load_map)
-		file_menu.add_separator()
-		file_menu.add_command(label="Exit", command=self.destroy)
+		self.file_menu.add_command(label="Save", command=self.save_map)
+		self.file_menu.add_command(label="Load", command=self.load_map)
+		self.file_menu.add_separator()
+		self.file_menu.add_command(label="Exit", command=self.destroy)
 
-		file_btn.config(menu=file_menu)
+		self.file_btn.config(menu=self.file_menu)
 
-		if not self.overrideredirect:
-			# Close Button
-			close_btn = tk.Button(
-				self.menu_bar,
-				text="✕",
-				bg=BG_PANEL,
-				fg=FG_TEXT,
-				activebackground=CLOSE_RED,
-				activeforeground=FG_TEXT,
-				bd=0,
-				command=self.destroy,
-			)
-			close_btn.pack(side="right", padx=5)
+		self.view_btn = tk.Menubutton(
+			self.menu_bar,
+			text="View",
+			bg=ThemeManager.Get("BG_Panel"),
+			fg=ThemeManager.Get("Text"),
+			activebackground=ThemeManager.Get("BG_Dark"),
+			activeforeground=ThemeManager.Get("Accent"),
+			font=("Segoe UI", 10, "bold"),
+		)
+		self.view_btn.pack(side="left", padx=5, pady=2)
 
-			# Minimize Button
-			min_btn = tk.Button(
-				self.menu_bar,
-				text="—",
-				bg=BG_PANEL,
-				fg=FG_TEXT,
-				activebackground=ACCENT,
-				activeforeground=BG_DARK,
-				bd=0,
-				command=self.minimize_window,
-			)
-			min_btn.pack(side="right")
+		self.view_menu = tk.Menu(
+			self.view_btn,
+			tearoff=0,
+			bg=ThemeManager.Get("BG_Dark"),
+			fg=ThemeManager.Get("Text"),
+			activebackground=ThemeManager.Get("Accent"),
+			activeforeground=ThemeManager.Get("BG_Dark"),
+		)
+
+		self.view_menu.add_command(label="Theme", command=self.theme_changer)
+
+		self.view_btn.config(menu=self.view_menu)
 
 	def minimize_window(self):
 		self.overrideredirect(False)
@@ -193,5 +190,88 @@ class App(tk.Tk):
 		y = self.winfo_pointery() - self._y_start
 		self.geometry(f"+{x}+{y}")
 
+	def theme_changer(self):
+		tm = ThemeManager.Get()
+		theme_names = tm.get_theme_names()
+
+		win = tk.Toplevel(self)
+		win.title("Select Theme")
+		win.geometry("300x150")
+		win.configure(bg=ThemeManager.Get("Panel", ThemeManager.Get("BG_Panel")))
+		win.transient(self)
+		win.grab_set()
+
+		if not theme_names:
+			tk.Label(
+				win,
+				text="No themes found",
+				bg=ThemeManager.Get("BG_Panel"),
+				fg=ThemeManager.Get("Text")
+			).pack(pady=20)
+			return
+
+		selected = tk.StringVar(value=tm.current_theme_name)
+
+		ttk.Label(win, text="Theme").pack(pady=(15, 5))
+
+		box = ttk.Combobox(
+			win,
+			textvariable=selected,
+			values=theme_names,
+			state="readonly",
+			width=25
+		)
+		box.pack(pady=5)
+
+		def apply():
+			tm.set_theme(selected.get())
+			self.apply_theme()
+			win.destroy()
+
+		tk.Button(win, text="Apply", command=apply).pack(pady=15)
+
+	def apply_theme(self):
+		theme = ThemeManager.Get().current_theme
+		if not theme:
+			return
+
+		self._setup_style()
+		self.configure(bg=ThemeManager.Get("BG_Dark"))
+
+		self.menu_bar.configure(
+			bg=ThemeManager.Get("BG_Panel")
+		)
+
+		self.file_btn.configure(
+			bg=ThemeManager.Get("BG_Panel"),
+			fg=ThemeManager.Get("Text"),
+			activebackground=ThemeManager.Get("BG_Dark"),
+			activeforeground=ThemeManager.Get("Accent"),
+		)
+		self.file_menu.configure(
+			bg=ThemeManager.Get("BG_Dark"),
+			fg=ThemeManager.Get("Text"),
+			activebackground=ThemeManager.Get("Accent"),
+			activeforeground=ThemeManager.Get("BG_Dark"),
+		)
+
+		self.view_btn.configure(
+			bg=ThemeManager.Get("BG_Panel"),
+			fg=ThemeManager.Get("Text"),
+			activebackground=ThemeManager.Get("BG_Dark"),
+			activeforeground=ThemeManager.Get("Accent"),
+		)
+		self.view_menu.configure(
+			bg=ThemeManager.Get("BG_Dark"),
+			fg=ThemeManager.Get("Text"),
+			activebackground=ThemeManager.Get("Accent"),
+			activeforeground=ThemeManager.Get("BG_Dark"),
+		)
+
+		self.load_tab.update_theme()
+		self.map_tab.update_theme()
+		self.refresh()
+
 if __name__ == "__main__":
+	ThemeManager.Get()
 	App().mainloop()

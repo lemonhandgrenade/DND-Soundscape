@@ -1,0 +1,14 @@
+{
+	"name": "Default",
+	"colors": {
+		"Accent": "#ff8c00",
+		"BG_Dark": "#1e1e1e",
+		"BG_Panel": "#252526",
+		"Close_Red": "#ec273f",
+		"Grid_Color": "#333333",
+		"Link_Line": "#ff8c8c",
+		"Node_Circle": "#ffb347",
+		"Text": "#d4d4d4",
+		"Text_Ghost": "#888888"
+	}
+}

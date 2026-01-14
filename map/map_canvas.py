@@ -19,21 +19,21 @@ class MapNode:
 		self.circle = self.canvas.create_oval(
 			x - radius, y - radius,
 			x + radius, y + radius,
-			outline=RADIUS_COLOR,
+			outline=ThemeManager.Get("Node_Circle"),
 			width=0.5
 		)
 
 		self.node = self.canvas.create_oval(
 			x - 8, y - 8,
 			x + 8, y + 8,
-			fill=ACCENT,
+			fill=ThemeManager.Get("Accent"),
 			outline=""
 		)
 
 		# Visual Connect To Cursor
 		self.link_line = self.canvas.create_line(
 			0, 0, 0, 0,
-			fill=CURSOR_COLOR,
+			fill=ThemeManager.Get("Link_Line"),
 			width=1.5,
 			dash=(4, 4),
 			state="hidden"
@@ -48,7 +48,7 @@ class MapNode:
 			x + 8, y,
 			text=f"{filename}\nVol: 0.00",
 			anchor="w",
-			fill=FG_TEXT,
+			fill=ThemeManager.Get("Text"),
 			font=("Segoe UI", 9)
 		)
 
@@ -107,7 +107,7 @@ class MapCanvas(tk.Canvas):
 	def __init__(self, parent, grid_size=40):
 		super().__init__(
 			parent,
-			bg=BG_DARK,
+			bg=ThemeManager.Get("BG_Dark"),
 			highlightthickness=0
 		)
 		self.parent = parent
@@ -121,18 +121,18 @@ class MapCanvas(tk.Canvas):
 		self.node_menu = tk.Menu(
 			self,
 			tearoff=0,
-			bg=BG_DARK,
-			fg=FG_TEXT,
-			activebackground=ACCENT,
-			activeforeground=BG_DARK,
-			disabledforeground=CLOSE_RED,
+			bg=ThemeManager.Get("BG_Dark"),
+			fg=ThemeManager.Get("Text"),
+			activebackground=ThemeManager.Get("Accent"),
+			activeforeground=ThemeManager.Get("BG_Dark"),
+			disabledforeground=ThemeManager.Get("Close_Red"),
 			bd=0,
 			borderwidth=0,
 			relief="flat"
 		)
 
 		self.node_menu.configure(
-			selectcolor=ACCENT,
+			selectcolor=ThemeManager.Get("Accent"),
 			disabledforeground="#777777"
 		)
 
@@ -144,7 +144,7 @@ class MapCanvas(tk.Canvas):
 			self.winfo_width() - 10, 10,
 			text="Offset: (0, 0)\nZoom: 1.00",
 			anchor="ne",
-			fill=ACCENT,
+			fill=ThemeManager.Get("Accent"),
 			font=("Segoe UI", 10, "bold"),
 		)
 
@@ -156,7 +156,7 @@ class MapCanvas(tk.Canvas):
 		# Cursor
 		self.cursor = self.create_oval(
 			0, 0, 12, 12,
-			fill=FG_TEXT,
+			fill=ThemeManager.Get("Text"),
 			outline=""
 		)
 		self.cursor_x = 200
@@ -230,7 +230,7 @@ class MapCanvas(tk.Canvas):
 		for node in self.nodes:
 			if hasattr(node.audio_node, "enabled") and not node.audio_node.enabled:
 				node.audio_node.set_volume(0)
-				self.itemconfig(node.text, fill=FG_TEXT_GHOST)
+				self.itemconfig(node.text, fill=ThemeManager.Get("Text_Ghost"))
 				continue
 			
 			nx, ny = node.center()
@@ -256,9 +256,9 @@ class MapCanvas(tk.Canvas):
 			filename = node.audio_node.file_path.split("/")[-1]
 			self.itemconfig(node.text, text=self.get_node_text(filename, vol))
 			if vol > 0:
-				self.itemconfig(node.text, fill=FG_TEXT)
+				self.itemconfig(node.text, fill=ThemeManager.Get("Text"))
 			else:
-				self.itemconfig(node.text, fill=FG_TEXT_GHOST)
+				self.itemconfig(node.text, fill=ThemeManager.Get("Text_Ghost"))
 
 	def get_node_text(self, filename, vol):
 		if self.is_simple.get():
@@ -277,8 +277,6 @@ class MapCanvas(tk.Canvas):
 	def draw_grid(self):
 		self.delete("grid")
 
-		size = self.grid_size * self.scale_factor
-
 		w = self.winfo_width()
 		h = self.winfo_height()
 
@@ -293,13 +291,13 @@ class MapCanvas(tk.Canvas):
 		x = start_x
 		while x <= end_x:
 			screen_x = x * self.scale_factor + self.offset_x
-			self.create_line(screen_x, 0, screen_x, h, fill=GRID_COLOR, tags="grid")
+			self.create_line(screen_x, 0, screen_x, h, fill=ThemeManager.Get("Grid_Color"), tags="grid")
 			x += self.grid_size
 
 		y = start_y
 		while y <= end_y:
 			screen_y = y * self.scale_factor + self.offset_y
-			self.create_line(0, screen_y, w, screen_y, fill=GRID_COLOR, tags="grid")
+			self.create_line(0, screen_y, w, screen_y, fill=ThemeManager.Get("Grid_Color"), tags="grid")
 			y += self.grid_size
 
 		self.tag_lower("grid")
@@ -320,7 +318,7 @@ class MapCanvas(tk.Canvas):
 
 		self.drop_outline = self.create_rectangle(
 			2, 2, w-2, h-2,
-			outline=ACCENT,
+			outline=ThemeManager.Get("Accent"),
 			width=3,
 			dash=(6, 4)
 		)
@@ -361,13 +359,13 @@ class MapCanvas(tk.Canvas):
 
 	def update_debug_info(self):
 		text = f"Offset: ({int(self.offset_x)}, {int(self.offset_y)})\nZoom: {self.scale_factor:.2f}"
-		self.itemconfig(self.debug_text, text=text)
+		self.itemconfig(self.debug_text, text=text, fill=ThemeManager.Get("Accent"))
 
 	def enable_node(self):
 		node = self.right_clicked_node
 		if node:
 			node.audio_node.enabled = True
-			self.itemconfig(node.node, fill=ACCENT)
+			self.itemconfig(node.node, fill=ThemeManager.Get("Accent"))
 			self.update_audio()
 
 	def disable_node(self):
@@ -400,14 +398,14 @@ class MapCanvas(tk.Canvas):
 		popup = tk.Toplevel(self)
 		popup.overrideredirect(True)
 		popup.geometry(f"220x60+{x}+{y}")
-		popup.configure(bg=BG_PANEL)
+		popup.configure(bg=ThemeManager.Get("BG_Panel"))
 		popup.attributes("-topmost", True)
 		
 		label = tk.Label(
 			popup,
 			text="Radius",
-			bg=BG_PANEL,
-			fg=FG_TEXT,
+			bg=ThemeManager.Get("BG_Panel"),
+			fg=ThemeManager.Get("Text"),
 			font=("Segoe UI", 10, "bold"),
 		)
 		label.pack(padx=0, ipadx=0, pady=0, ipady=0)
@@ -417,14 +415,14 @@ class MapCanvas(tk.Canvas):
 			from_=20,
 			to=300,
 			orient="horizontal",
-			bg=GRID_COLOR,
-			fg=FG_TEXT,
-			troughcolor=BG_DARK,
+			bg=ThemeManager.Get("Grid_Color"),
+			fg=ThemeManager.Get("Text"),
+			troughcolor=ThemeManager.Get("BG_Dark"),
 			highlightthickness=0,
 			length=200,
 			showvalue=0,
 			sliderrelief="flat",
-			activebackground=ACCENT
+			activebackground=ThemeManager.Get("Accent")
 		)
 		slider.set(node.radius)
 		slider.pack(padx=0, ipadx=0, pady=0, ipady=0)
@@ -455,3 +453,27 @@ class MapCanvas(tk.Canvas):
 				self.nodes.remove(node)
 
 		self.update_audio()
+
+	def update_theme(self):
+		self.update_debug_info()
+
+		self.itemconfig(self.cursor, fill=ThemeManager.Get("Text"))
+
+		self.node_menu.configure(
+			selectcolor=ThemeManager.Get("Accent"),
+			activebackground=ThemeManager.Get("Accent"),
+			bg=ThemeManager.Get("BG_Dark"),
+			activeforeground=ThemeManager.Get("BG_Dark"),
+			disabledforeground=ThemeManager.Get("Close_Red"),
+			fg=ThemeManager.Get("Text")
+		)
+
+		self.configure(
+			bg=ThemeManager.Get("BG_Dark")
+		)
+
+		for node in self.nodes:
+			self.itemconfig(node.circle, outline=ThemeManager.Get("Node_Circle"))
+			self.itemconfig(node.link_line, fill=ThemeManager.Get("Link_Line"))
+			self.itemconfig(node.node, fill=ThemeManager.Get("Accent"))
+			self.itemconfig(node.text, fill=ThemeManager.Get("Text"))
