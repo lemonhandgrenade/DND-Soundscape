@@ -8,8 +8,7 @@
 - **Node Based**: Simply drag and drop loaded files into the map and guide the cursor to play.
 - **File Support**: Currently supporting .mp3, .ogg and .wav files.
 - **Save & Load**: You can save and load your soundscapes to be used later.
-
-
+- **Themes**: Has a lot of themes which are also very easy to make.
 ## Installation
 If you don't want to use the precompiled [release](https://github.com/lemonhandgrenade/DND-Soundscape/releases/latest), you can run it directly using python.  
 
