@@ -1,0 +1,14 @@
+{
+	"name": "Ayu",
+	"colors": {
+		"Accent": "#FF8F40",
+		"BG_Dark": "#0D1017",
+		"BG_Panel": "#10141C",
+		"Close_Red": "#F07178",
+		"Grid_Color": "#333333",
+		"Link_Line": "#F29668",
+		"Node_Circle": "#FFB454",
+		"Text": "#99ADBF",
+		"Text_Ghost": "#6C7380"
+	}
+}

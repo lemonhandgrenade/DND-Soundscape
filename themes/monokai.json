@@ -1,0 +1,14 @@
+{
+	"name": "Monokai",
+	"colors": {
+		"Accent": "#FD971F",
+		"BG_Dark": "#272822",
+		"BG_Panel": "#49483E",
+		"Close_Red": "#F92672",
+		"Grid_Color": "#49483E",
+		"Link_Line": "#529B2F",
+		"Node_Circle": "#FFD569",
+		"Text": "#CCCCCC",
+		"Text_Ghost": "#F8F8F0"
+	}
+}

@@ -1,0 +1,14 @@
+{
+	"name": "Squirrelsong",
+	"colors": {
+		"Accent": "#527b98",
+		"BG_Dark": "#fdfdfe",
+		"BG_Panel": "#f7f6f9",
+		"Close_Red": "#f0a8c2",
+		"Grid_Color": "#e8e5eb",
+		"Link_Line": "#9bae7e",
+		"Node_Circle": "#80a4be",
+		"Text": "#4c4b4e",
+		"Text_Ghost": "#78737d"
+	}
+}

@@ -1,0 +1,14 @@
+{
+	"name": "Dracula",
+	"colors": {
+		"Accent": "#FD971F",
+		"BG_Dark": "#282A36",
+		"BG_Panel": "#44475A",
+		"Close_Red": "#FF5555",
+		"Grid_Color": "#44475A",
+		"Link_Line": "#BD93F9",
+		"Node_Circle": "#FFD569",
+		"Text": "#F8F8F2",
+		"Text_Ghost": "#6272A4"
+	}
+}

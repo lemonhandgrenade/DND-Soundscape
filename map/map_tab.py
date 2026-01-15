@@ -1,9 +1,11 @@
 import tkinter as tk
+from tkinter import ttk
 import json
 import gzip
 
+from enums import GlideMode
 from map.map_canvas import MapCanvas, MapNode
-from audio_engine import AudioNode, load_sound_async
+from audio_engine import AudioNode, PlayStyle, load_sound_async
 from utils.theme import *
 from utils.alerts import AlertManager
 
@@ -67,33 +69,60 @@ class MapTab(tk.Frame):
 			fg=ThemeManager.Get("Text"),
 			selectcolor=ThemeManager.Get("BG_Panel"),
 			activebackground=ThemeManager.Get("BG_Panel"),
-			activeforeground=ThemeManager.Get("Accent")
+			activeforeground=ThemeManager.Get("Accent"),
+			relief="flat"
 		)
 		self.grid_snap_check.pack(anchor="nw", padx=10, pady=2)
 
 		# Cursor Interp Checkbox
-		self.glide_check = tk.Checkbutton(
-			self,
+		self.glide_frame = tk.Frame(self, bg=ThemeManager.Get("BG_Panel"))
+		self.glide_frame.pack(anchor="nw", padx=10, pady=2, fill="x")
+
+		self.glide_label = tk.Label(
+			self.glide_frame,
 			text="Glide",
-			variable=self.canvas.glide_enabled,
 			bg=ThemeManager.Get("BG_Panel"),
 			fg=ThemeManager.Get("Text"),
-			selectcolor=ThemeManager.Get("BG_Panel"),
-			activebackground=ThemeManager.Get("BG_Panel"),
-			activeforeground=ThemeManager.Get("Accent")
+			font=("Segoe UI", 9)
 		)
-		self.glide_check.pack(anchor="nw", padx=10, pady=2)
+		self.glide_label.pack(side="left")
+
+		self.glide_combo = ttk.Combobox(
+			self.glide_frame,
+			state="readonly",
+			values=["Snap", "Linear", "Ease Out"],
+			width=10,
+			style="Dark.TCombobox"
+		)
+		self.glide_combo.pack(side="right")
+
+		mode_map = {
+			GlideMode.SNAP: "Snap",
+			GlideMode.LINEAR: "Linear",
+			GlideMode.EASE_OUT: "Ease Out"
+		}
+		self.glide_combo.set(mode_map[self.canvas.glide_mode.get()])
+
+		def on_glide_change(event):
+			text = self.glide_combo.get()
+
+			if text == "Snap":
+				self.canvas.glide_mode.set(GlideMode.SNAP)
+			elif text == "Linear":
+				self.canvas.glide_mode.set(GlideMode.LINEAR)
+			elif text == "Ease Out":
+				self.canvas.glide_mode.set(GlideMode.EASE_OUT)
+
+			self.glide_combo.selection_clear()
+			self.glide_combo.master.focus_set()
+
+		self.glide_combo.bind("<<ComboboxSelected>>", on_glide_change)
 
 		# Simple Debug Info
 		self.simple_ui_check = tk.Checkbutton(
 			self,
 			text="Simple Debug UI",
 			variable=self.canvas.is_simple,
-			bg=ThemeManager.Get("BG_Panel"),
-			fg=ThemeManager.Get("Text"),
-			selectcolor=ThemeManager.Get("BG_Panel"),
-			activebackground=ThemeManager.Get("BG_Panel"),
-			activeforeground=ThemeManager.Get("Accent")
 		)
 		self.simple_ui_check.pack(anchor="nw", padx=10, pady=2)
 
@@ -197,17 +226,26 @@ class MapTab(tk.Frame):
 
 	def save_map(self, file_path):
 		data = {
-			"cursor": {"x": self.canvas.cursor_x, "y": self.canvas.cursor_y},
+			"version": 1,
+			"cursor": {
+				"x": self.canvas.cursor_x,
+				"y": self.canvas.cursor_y
+			},
 			"nodes": []
 		}
+
 		for node in self.canvas.nodes:
+			audio = node.audio_node
 			data["nodes"].append({
-				"file_path": node.audio_node.file_path,
+				"file_path": audio.file_path,
 				"x": node.real_x,
 				"y": node.real_y,
 				"radius": node.radius,
-				"enabled": getattr(node.audio_node, "enabled", True)
+				"enabled": audio.enabled,
+				"playstyle": audio.playstyle,
+				"loops": audio.loops
 			})
+
 		with gzip.open(file_path, "wt", encoding="utf-8") as f:
 			json.dump(data, f)
 
@@ -218,22 +256,30 @@ class MapTab(tk.Frame):
 
 			for node in self.canvas.nodes[:]:
 				node.audio_node.channel.stop()
-				self.delete(node.node)
-				self.delete(node.circle)
-				self.delete(node.text)
+				self.canvas.delete(node.node)
+				self.canvas.delete(node.circle)
+				self.canvas.delete(node.text)
 			self.canvas.nodes.clear()
 
-			self.canvas.cursor_x = data["cursor"]["x"]
-			self.canvas.cursor_y = data["cursor"]["y"]
-			self.canvas.cursor_target_x = self.canvas.cursor_x
-			self.canvas.cursor_target_y = self.canvas.cursor_y
+			cursor = data.get("cursor", {"x": 200, "y": 200})
+			self.canvas.cursor_x = cursor["x"]
+			self.canvas.cursor_y = cursor["y"]
+			self.canvas.cursor_target_x = cursor["x"]
+			self.canvas.cursor_target_y = cursor["y"]
 
-			for node_data in data["nodes"]:
+			for node_data in data.get("nodes", []):
 				file = node_data["file_path"]
 				load_sound_async(file)
-				shared_files.append(file)
+
+				if file not in shared_files:
+					shared_files.append(file)
+
 				audio = AudioNode(file, True)
+
 				audio.enabled = node_data.get("enabled", True)
+				audio.playstyle = node_data.get("playstyle", PlayStyle.LOOP_FOREVER)
+				audio.loops = node_data.get("loops", -1)
+
 				node = MapNode(
 					self.canvas,
 					node_data["x"],
@@ -244,8 +290,8 @@ class MapTab(tk.Frame):
 				self.canvas.nodes.append(node)
 
 			self.canvas.update_all_positions()
-		except:
-			AlertManager.Get().CreateWarning("The File Could Not Be Loaded, It May Be Corrupted")
+		except Exception as e:
+			AlertManager.Get().CreateWarning(f"The File Could Not Be Loaded, It May Be Corrupted: {e}")
 
 
 	def remove_file(self, file_path):						# Remove File
@@ -279,13 +325,6 @@ class MapTab(tk.Frame):
 			activebackground=ThemeManager.Get("BG_Panel"),
 			fg=ThemeManager.Get("Text"),
 		)
-		self.glide_check.configure(
-			activeforeground=ThemeManager.Get("Accent"),
-			bg=ThemeManager.Get("BG_Panel"),
-			selectcolor=ThemeManager.Get("BG_Panel"),
-			activebackground=ThemeManager.Get("BG_Panel"),
-			fg=ThemeManager.Get("Text"),
-		)
 		self.simple_ui_check.configure(
 			activeforeground=ThemeManager.Get("Accent"),
 			bg=ThemeManager.Get("BG_Panel"),
@@ -298,6 +337,13 @@ class MapTab(tk.Frame):
 			bg=ThemeManager.Get("BG_Dark"),
 			fg=ThemeManager.Get("Text"),
 			insertbackground=ThemeManager.Get("Text")
+		)
+
+		self.glide_frame.configure(bg=ThemeManager.Get("BG_Panel"))
+
+		self.glide_label.configure(
+			bg=ThemeManager.Get("BG_Panel"),
+			fg=ThemeManager.Get("Text")
 		)
 
 		self.canvas.update_theme()

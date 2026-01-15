@@ -2,13 +2,13 @@ import os
 import json
 
 from utils.alerts import AlertManager
+from utils.options import OptionsManager
 
 class ThemeManager():
 	_instance = None
 
 	def __init__(self):
 		self.theme_dir = "./themes"
-		self.config_path = "./options.json"
 
 		self.themes = {}
 		self.current_theme_name = None
@@ -36,6 +36,8 @@ class ThemeManager():
 
 		return cls._instance._get_value(key, default)
 
+	def force_reload_themes(self):
+		self._load_themes()
 	def _load_themes(self):
 		self.themes.clear()
 
@@ -76,15 +78,7 @@ class ThemeManager():
 			self._save_config()
 
 	def _load_config(self):
-		theme_name = None
-
-		if os.path.isfile(self.config_path):
-			try:
-				with open(self.config_path, "r", encoding="utf-8") as f:
-					cfg = json.load(f)
-					theme_name = cfg.get("theme")
-			except Exception:
-				pass
+		theme_name = OptionsManager.Get("theme")
 
 		if theme_name in self.themes:
 			self.set_theme(theme_name, save=False)
@@ -93,11 +87,7 @@ class ThemeManager():
 
 	def _save_config(self):
 		try:
-			with open(self.config_path, "w", encoding="utf-8") as f:
-				json.dump(
-					{"theme": self.current_theme_name},
-					f
-				)
+			OptionsManager.Set("theme", self.current_theme_name)
 		except Exception as e:
 			AlertManager.Get().CreateAlert(f"Failed To Save Options: {e}")
 

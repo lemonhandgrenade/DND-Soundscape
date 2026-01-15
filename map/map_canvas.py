@@ -1,7 +1,8 @@
 import tkinter as tk
 import math
-
-from audio_engine import AudioNode
+import numpy as np
+from audio_engine import AudioNode, PlayStyle
+from enums import GlideMode
 from utils.theme import *
 
 class MapNode:
@@ -154,9 +155,20 @@ class MapCanvas(tk.Canvas):
 		)
 
 		self.grid_size = grid_size
-		self.snap_to_grid = tk.BooleanVar(value=False)
-		self.glide_enabled = tk.BooleanVar(value=True)
-		self.is_simple = tk.BooleanVar(value=False)
+		self.snap_to_grid = tk.BooleanVar(value=OptionsManager.Get("snap_to_grid"))
+		def _on_snap_change(*_):
+			OptionsManager.Set("snap_to_grid", self.snap_to_grid.get())
+		self.snap_to_grid.trace_add("write", _on_snap_change)
+
+		self.glide_mode = tk.StringVar(value=OptionsManager.Get("glide_mode"))
+		def _on_glide_changed(*_):
+			OptionsManager.Set("glide_mode", self.glide_mode.get())
+		self.glide_mode.trace_add("write", _on_glide_changed)
+
+		self.is_simple = tk.BooleanVar(value=OptionsManager.Get("simple_ui"))
+		def _on_simple_change(*_):
+			OptionsManager.Set("simple_ui", self.is_simple.get())
+		self.is_simple.trace_add("write", _on_simple_change)
 		
 		# Cursor
 		self.cursor = self.create_oval(
@@ -179,8 +191,63 @@ class MapCanvas(tk.Canvas):
 
 		self.bind("<B1-Motion>", self.drag_cursor)
 
+		self.bind("<KeyPress-f>", self.refocus)
+		self.configure(takefocus=True)
+		self.bind("<Button-1>", lambda e: self.focus_set(), add="+")
+
 		# Glide Loop Every 16~ ms
 		self.after(16, self._glide_loop)
+
+	def _calc_zoom_from_dist(self, x: float) -> float:
+		scalar = ((586 / self.winfo_width()) + (536 / self.winfo_height())) / 2
+		magic = 13.6 * (x ** (-0.475))
+		return min(magic, 2) / scalar
+
+	def _refocus_nodes(self):
+		coords_min = np.array([1000000000.0, 1000000000.0])
+		coords_max = np.array([-1000000000.0, -1000000000.0])
+		for node in self.nodes:
+			cx, cy = node.center()
+			coord = np.array([cx,cy])							# Get Pos Without Panning / Zooming
+			coord -= np.array([self.offset_x,self.offset_y])	#
+			coord /= self.scale_factor							#
+			
+			coords_min = np.minimum(coords_min, coord)
+			coords_max = np.maximum(coords_max, coord)
+
+		node_dist = np.linalg.norm(coords_max-coords_min)
+		calc_zoom = self._calc_zoom_from_dist(node_dist)
+		self.set_zoom(calc_zoom)
+
+		offset_x = ((coords_min[0] + coords_max[0]) / 2.0) * self.scale_factor
+		offset_y = ((coords_min[1] + coords_max[1]) / 2.0) * self.scale_factor
+
+		self.offset_x = -offset_x + (self.winfo_width() / 2)
+		self.offset_y = -offset_y + (self.winfo_height() / 2)
+
+	def _refocus_nodeless(self):
+		self.set_zoom(1)
+
+		offset_x = 0.0
+		offset_y = 0.0
+
+		offset_x = -self.cursor_x
+		offset_y = -self.cursor_y
+
+		self.offset_x = offset_x + (self.winfo_width() / 2)
+		self.offset_y = offset_y + (self.winfo_height() / 2)
+
+	def refocus(self, event):
+		count = len(self.nodes)
+
+		if count > 0:
+			self._refocus_nodes()
+		else:
+			self._refocus_nodeless()
+		
+		self.pan_start = (0, 0)
+		self.update_all_positions()
+		self.update_debug_info()
 
 	def generate_node_menu(self, enabled: bool):
 		"""Creates The Right Click Menu For Nodes
@@ -208,15 +275,45 @@ class MapCanvas(tk.Canvas):
 		self.cursor_target_x = (x - self.offset_x) / self.scale_factor
 		self.cursor_target_y = (y - self.offset_y) / self.scale_factor
 
-		if not self.glide_enabled.get():
+		if self.glide_mode.get() == GlideMode.SNAP:
 			self.cursor_x = self.cursor_target_x
 			self.cursor_y = self.cursor_target_y
 			self.update_cursor_position()
 
+	def glide_linear(self, current: np.ndarray[float, float], target: np.ndarray[float, float], speed: float) -> np.ndarray[float, float]:
+		delta = target - current
+		delta_size = np.linalg.norm(delta)
+		step = speed * .016666
+
+		if delta_size <= step:
+			return target
+		
+		if step > 0:
+			delta_norm = delta / delta_size
+			return current + delta_norm * step
+		else:
+			return current
+		
+	def glide_ease_out(self, current: np.ndarray[float, float], target: np.ndarray[float, float], speed: float) -> np.ndarray[float, float]:
+		delta = target - current
+		step = delta * .016666 * speed
+		return current + step
+
 	def update_cursor_position(self):
-		if self.glide_enabled.get():
-			self.cursor_x += (self.cursor_target_x - self.cursor_x) * 0.0166
-			self.cursor_y += (self.cursor_target_y - self.cursor_y) * 0.0166
+		if self.glide_mode.get() == GlideMode.SNAP:
+			self.cursor_x = self.cursor_target_x
+			self.cursor_y = self.cursor_target_y
+		else:
+			pos = np.array([self.cursor_x, self.cursor_y])
+			target = np.array([self.cursor_target_x, self.cursor_target_y])
+			real = np.array([0,0])
+			
+			if self.glide_mode.get() == GlideMode.LINEAR:
+				real = self.glide_linear(pos, target, 75)
+			elif self.glide_mode.get() == GlideMode.EASE_OUT:
+				real = self.glide_ease_out(pos, target, 2)
+			self.cursor_x = real[0]
+			self.cursor_y = real[1]
 
 		sx = self.cursor_x * self.scale_factor + self.offset_x
 		sy = self.cursor_y * self.scale_factor + self.offset_y
@@ -274,7 +371,17 @@ class MapCanvas(tk.Canvas):
 				vol = 0
 				self.itemconfig(node.link_line, state="hidden")
 
-			node.audio_node.set_volume(vol)
+			#node.audio_node.set_volume(vol)
+			audio = node.audio_node
+
+			if audio.playstyle == PlayStyle.CURSOR_ENTER:
+				if vol > 0 and not audio.is_playing:
+					audio.play()
+				elif vol == 0 and audio.is_playing:
+					audio.stop()
+
+			audio.set_volume(vol)
+
 
 			filename = node.audio_node.file_path.split("/")[-1]
 			self.itemconfig(node.text, text=self.get_node_text(filename, vol))
@@ -361,13 +468,35 @@ class MapCanvas(tk.Canvas):
 			self.drop_outline = None
 
 	def on_zoom(self, event):
-		factor = 1.1 if event.delta > 0 else 1/1.1
-		self.scale_factor *= factor
-		self.scale_factor = max(0.2, min(3.0, self.scale_factor))
+		self.focus_set()
+
+		factor = 1.1 if event.delta > 0 else 1 / 1.1
+
+		old_scale = self.scale_factor
+		new_scale = old_scale * factor
+		new_scale = max(0.2, min(3.0, new_scale))
+
+		factor = new_scale / old_scale
+		mouse_x, mouse_y = event.x, event.y
+
+		grid_x = (mouse_x - self.offset_x) / old_scale
+		grid_y = (mouse_y - self.offset_y) / old_scale
+
+		self.scale_factor = new_scale
+
+		self.offset_x = mouse_x - grid_x * self.scale_factor
+		self.offset_y = mouse_y - grid_y * self.scale_factor
+
+		self.update_all_positions()
+		self.update_debug_info()
+
+	def set_zoom(self, zoom):
+		self.scale_factor = zoom
 		self.update_all_positions()
 		self.update_debug_info()
 
 	def start_pan(self, event):
+		self.focus_set()
 		self.pan_start = (event.x, event.y)
 
 	def do_pan(self, event):
@@ -486,8 +615,17 @@ class MapCanvas(tk.Canvas):
 
 		self.update_audio()
 
+	def get_audio_settings_for_file(self, file_path):
+		for node in self.nodes:
+			if node.audio_node.file_path == file_path:
+				audio = node.audio_node
+				return audio.playstyle, audio.loops
+
+		return "loop_forever", -1
+
 	def update_theme(self):
 		self.update_debug_info()
+		self.configure(bg=ThemeManager.Get("BG_Dark"))
 
 		self.itemconfig(self.cursor, fill=ThemeManager.Get("Text"))
 
@@ -500,9 +638,7 @@ class MapCanvas(tk.Canvas):
 			fg=ThemeManager.Get("Text")
 		)
 
-		self.configure(
-			bg=ThemeManager.Get("BG_Dark")
-		)
+		self.draw_grid()
 
 		for node in self.nodes:
 			self.itemconfig(node.circle, outline=ThemeManager.Get("Node_Circle"))

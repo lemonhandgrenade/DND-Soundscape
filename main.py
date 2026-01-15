@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog
 from load.load_tab import LoadTab
 from map.map_tab import MapTab
+from edit.edit_tab import EditTab
 from utils.theme import *
 
 class App(tk.Tk):
@@ -67,13 +68,90 @@ class App(tk.Tk):
 			background=[("active", ThemeManager.Get("BG_Dark"))]
 		)
 
+		style.configure(
+			"Edit.TLabel",
+			background=ThemeManager.Get("BG_Panel"),
+			foreground=ThemeManager.Get("Text"),
+			font=("Segoe UI", 9)
+		)
+
+		style.configure(
+			"EditBold.TLabel",
+			background=ThemeManager.Get("BG_Panel"),
+			foreground=ThemeManager.Get("Text"),
+			font=("Segoe UI", 10, "bold")
+		)
+
+		style.configure(
+			"Edit.TCombobox",
+			fieldbackground=ThemeManager.Get("BG_Panel"),
+			background=ThemeManager.Get("BG_Panel"),
+			foreground=ThemeManager.Get("Text"),
+			arrowcolor=ThemeManager.Get("Text"),
+			relief="flat",
+			borderwidth=0,
+			padding=4
+		)
+
+		style.map(
+			"Edit.TCombobox",
+			fieldbackground=[("readonly", ThemeManager.Get("BG_Panel"))],
+			background=[("readonly", ThemeManager.Get("BG_Panel"))],
+			foreground=[("readonly", ThemeManager.Get("Text"))]
+		)
+	
+		style.configure(
+			"Dark.TCombobox",
+			fieldbackground=ThemeManager.Get("BG_Dark"),
+			background=ThemeManager.Get("BG_Dark"),
+			foreground=ThemeManager.Get("Text"),
+			arrowcolor=ThemeManager.Get("Text"),
+			relief="flat",
+			borderwidth=0,
+			padding=4
+		)
+
+		style.map(
+			"Dark.TCombobox",
+			fieldbackground=[("readonly", ThemeManager.Get("BG_Dark"))],
+			background=[("readonly", ThemeManager.Get("BG_Dark"))],
+			foreground=[("readonly", ThemeManager.Get("Text"))]
+		)
+
+		self.option_add("*TCombobox*Listbox*Background", ThemeManager.Get("BG_Panel"))
+		self.option_add('*TCombobox*Listbox*Foreground', ThemeManager.Get("Text"))
+
+		style.configure(
+			"Edit.TSpinbox",
+			relief="flat",
+			borderwidth=0,
+			padding=4,
+			background=ThemeManager.Get("BG_Panel"),
+			foreground=ThemeManager.Get("Text"),
+			fieldbackground=ThemeManager.Get("BG_Panel"),
+			arrowcolor=ThemeManager.Get("Text")
+		)
+
+		self.option_add("*Checkbutton.relief", "flat")
+		self.option_add("*Checkbutton.borderWidth", 0)
+		self.option_add("*Checkbutton.highlightThickness", 0)
+
+		self.option_add("*Checkbutton.background", ThemeManager.Get("BG_Panel"))
+		self.option_add("*Checkbutton.foreground", ThemeManager.Get("Text"))
+		self.option_add("*Checkbutton.activeBackground", ThemeManager.Get("BG_Panel"))
+		self.option_add("*Checkbutton.activeForeground", ThemeManager.Get("Accent"))
+		self.option_add("*Checkbutton.selectColor", ThemeManager.Get("BG_Panel"))
+
+
 	def _setup_tabs(self):
 		tabs = ttk.Notebook(self, style="TNotebook")
 		self.map_tab = MapTab(tabs, self.loaded_files)
 		self.load_tab = LoadTab(tabs, self.loaded_files, self.remove_file, self.refresh)
+		self.edit_tab = EditTab(tabs, self.loaded_files, self.map_tab)
 
 		tabs.add(self.load_tab, text="Load")
 		tabs.add(self.map_tab, text="Map")
+		tabs.add(self.edit_tab, text="Edit")
 		tabs.pack(fill="both", expand=True)
 
 		tabs.bind("<<NotebookTabChanged>>", self.on_tab_change)
@@ -111,6 +189,7 @@ class App(tk.Tk):
 	def refresh(self):
 		self.map_tab.refresh()
 		self.load_tab.refresh()
+		self.edit_tab.refresh()
 
 	def create_custom_menu(self):
 		self.menu_bar = tk.Frame(self, bg=ThemeManager.Get("BG_Panel"), height=30)
@@ -164,6 +243,7 @@ class App(tk.Tk):
 		)
 
 		self.view_menu.add_command(label="Theme", command=self.theme_changer)
+		self.view_menu.add_command(label="Reload Themes", command=self.reload_themes)
 
 		self.view_btn.config(menu=self.view_menu)
 
@@ -187,6 +267,12 @@ class App(tk.Tk):
 		x = self.winfo_pointerx() - self._x_start
 		y = self.winfo_pointery() - self._y_start
 		self.geometry(f"+{x}+{y}")
+
+	def reload_themes(self):
+		tm = ThemeManager.Get()
+		tm.force_reload_themes()
+		tm.set_theme(tm.current_theme_name)
+		self.apply_theme()
 
 	def theme_changer(self):
 		tm = ThemeManager.Get()
@@ -224,7 +310,8 @@ class App(tk.Tk):
 			textvariable=selected,
 			values=theme_names,
 			state="readonly",
-			width=25
+			width=25,
+			style="Dark.TCombobox"
 		)
 		box.pack(pady=5)
 
@@ -281,6 +368,7 @@ class App(tk.Tk):
 
 		self.load_tab.update_theme()
 		self.map_tab.update_theme()
+		self.edit_tab.update_theme()
 		self.refresh()
 
 if __name__ == "__main__":
