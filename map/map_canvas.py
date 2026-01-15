@@ -70,14 +70,13 @@ class MapNode:
 
 	def on_press(self, event):						# On Click
 		self.canvas.dragging_node = True
-
+	
 	def on_drag(self, event):						# Drag Node
 		x = (event.x - self.offset_x) / self.canvas.scale_factor
 		y = (event.y - self.offset_y) / self.canvas.scale_factor
 
 		if self.canvas.snap_to_grid.get():
-			x = round((x - (self.canvas.offset_x / self.canvas.scale_factor)) / self.canvas.grid_size) * self.canvas.grid_size
-			y = round((y - (self.canvas.offset_y / self.canvas.scale_factor)) / self.canvas.grid_size) * self.canvas.grid_size
+			x, y = self.canvas.gridify(x, y)
 		else:
 			x -= (self.canvas.offset_x / self.canvas.scale_factor)
 			y -= (self.canvas.offset_y / self.canvas.scale_factor)
@@ -343,6 +342,23 @@ class MapCanvas(tk.Canvas):
 		node = MapNode(self, x / self.scale_factor, y / self.scale_factor, audio)
 		self.nodes.append(node)
 		self.update_all_positions()
+
+		
+	def gridify(self, x: float, y: float) -> tuple[float, float]:
+		"""Converts An X & Y To The Closest Grid Corner Coord
+
+		Args:
+			x (float): X Coord
+			y (float): Y Coord
+
+		Returns:
+			tuple[float,float]: X And Y Of Nearest Grid Corner
+		"""
+		gs = self.grid_size
+		sf = self.scale_factor
+		x = round((x - (self.offset_x / sf)) / gs) * gs
+		y = round((y - (self.offset_y / sf)) / gs) * gs
+		return x, y
 
 
 	def update_audio(self):
@@ -611,6 +627,7 @@ class MapCanvas(tk.Canvas):
 				self.delete(node.node)
 				self.delete(node.circle)
 				self.delete(node.text)
+				self.delete(node.link_line)
 
 				self.nodes.remove(node)
 

@@ -27,7 +27,7 @@ class MapTab(tk.Frame):
 			self.left_panel,
 			textvariable=self.search_var,
 			bg=ThemeManager.Get("BG_Dark"),
-			fg=ThemeManager.Get("Text"),
+			fg=ThemeManager.Get("Text_Ghost"),
 			insertbackground=ThemeManager.Get("Text"),
 			takefocus=0,
 			relief="flat",
@@ -133,6 +133,8 @@ class MapTab(tk.Frame):
 
 
 	def start_drag(self, event):							# On Mouse Down
+		if len(self.filtered_files) == 0:
+			return
 		self.dragged_index = self.sidebar.nearest(event.y)
 
 		self.sidebar.selection_clear(0, tk.END)				# Lock Selection To Avoid Weird List Visuals
@@ -195,7 +197,11 @@ class MapTab(tk.Frame):
 			file_path = self.shared_files[index]
 			x = self.canvas.canvasx(event.x_root - self.canvas.winfo_rootx())
 			y = self.canvas.canvasy(event.y_root - self.canvas.winfo_rooty())
-			self.canvas.add_node(x - self.canvas.offset_x, y - self.canvas.offset_y, file_path)
+			x -= self.canvas.offset_x
+			y -= self.canvas.offset_y
+			if self.canvas.snap_to_grid.get():
+				x, y = self.canvas.gridify(x, y)
+			self.canvas.add_node(x, y, file_path)
 
 	def update_search(self, *args):
 		filter = self.search_var.get().lower()
