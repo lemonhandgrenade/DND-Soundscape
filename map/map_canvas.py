@@ -200,7 +200,8 @@ class MapCanvas(tk.Canvas):
 
 	def _calc_zoom_from_dist(self, x: float) -> float:
 		scalar = ((586 / self.winfo_width()) + (536 / self.winfo_height())) / 2
-		magic = 13.6 * (x ** (-0.475))
+		epsillon = 1e-6
+		magic = 13.6 * (max(x, epsillon) ** (-0.475))
 		return min(magic, 2) / scalar
 
 	def _refocus_nodes(self):
