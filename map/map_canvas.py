@@ -200,7 +200,7 @@ class MapCanvas(tk.Canvas):
 	def _calc_zoom_from_dist(self, x: float) -> float:
 		scalar = ((586 / self.winfo_width()) + (536 / self.winfo_height())) / 2
 		epsillon = 1e-6
-		magic = 13.6 * (max(x, epsillon) ** (-0.475))
+		magic = 18.9 * (max(x, epsillon) ** -0.52) - 0.09
 		return min(magic, 2) / scalar
 
 	def _refocus_nodes(self):
@@ -388,7 +388,6 @@ class MapCanvas(tk.Canvas):
 				vol = 0
 				self.itemconfig(node.link_line, state="hidden")
 
-			#node.audio_node.set_volume(vol)
 			audio = node.audio_node
 
 			if audio.playstyle == PlayStyle.CURSOR_ENTER:
@@ -500,6 +499,7 @@ class MapCanvas(tk.Canvas):
 		grid_y = (mouse_y - self.offset_y) / old_scale
 
 		self.scale_factor = new_scale
+		self.scale_factor = round(self.scale_factor, 1)
 
 		self.offset_x = mouse_x - grid_x * self.scale_factor
 		self.offset_y = mouse_y - grid_y * self.scale_factor
@@ -509,6 +509,7 @@ class MapCanvas(tk.Canvas):
 
 	def set_zoom(self, zoom):
 		self.scale_factor = zoom
+		self.scale_factor = round(self.scale_factor, 1)
 		self.update_all_positions()
 		self.update_debug_info()
 
@@ -536,7 +537,7 @@ class MapCanvas(tk.Canvas):
 		self.draw_grid()
 
 	def update_debug_info(self):
-		text = f"Offset: ({int(self.offset_x)}, {int(self.offset_y)})\nZoom: {self.scale_factor:.2f}"
+		text = f"Offset: ({int(self.offset_x)}, {int(self.offset_y)})\nZoom: {self.scale_factor:.1f}"
 		self.itemconfig(self.debug_text, text=text, fill=ThemeManager.Get("Accent"))
 
 	def enable_node(self):
