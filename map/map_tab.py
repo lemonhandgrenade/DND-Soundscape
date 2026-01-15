@@ -285,9 +285,14 @@ class MapTab(tk.Frame):
 					node_data["x"],
 					node_data["y"],
 					audio,
-					radius=node_data.get("radius", 120)
+					radius=node_data.get("radius", 120),
 				)
 				self.canvas.nodes.append(node)
+
+				node_color = ThemeManager.Get("Node")
+				if not audio.enabled:
+					node_color = ThemeManager.Get("Node_Disabled")
+				self.canvas.itemconfig(node.node, fill=node_color)
 
 			self.canvas.update_all_positions()
 		except Exception as e:

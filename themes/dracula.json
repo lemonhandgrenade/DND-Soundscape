@@ -7,7 +7,9 @@
 		"Close_Red": "#FF5555",
 		"Grid_Color": "#44475A",
 		"Link_Line": "#BD93F9",
+		"Node": "#FD971F",
 		"Node_Circle": "#FFD569",
+		"Node_Disabled": "#54576A",
 		"Text": "#F8F8F2",
 		"Text_Ghost": "#6272A4"
 	}

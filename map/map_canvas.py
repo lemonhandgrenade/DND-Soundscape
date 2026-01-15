@@ -27,7 +27,7 @@ class MapNode:
 		self.node = self.canvas.create_oval(
 			x - 8, y - 8,
 			x + 8, y + 8,
-			fill=ThemeManager.Get("Accent"),
+			fill=ThemeManager.Get("Node"),
 			outline=""
 		)
 
@@ -526,14 +526,14 @@ class MapCanvas(tk.Canvas):
 		node = self.right_clicked_node
 		if node:
 			node.audio_node.enabled = True
-			self.itemconfig(node.node, fill=ThemeManager.Get("Accent"))
+			self.itemconfig(node.node, fill=ThemeManager.Get("Node"))
 			self.update_audio()
 
 	def disable_node(self):
 		node = self.right_clicked_node
 		if node:
 			node.audio_node.enabled = False
-			self.itemconfig(node.node, fill="gray")
+			self.itemconfig(node.node, fill=ThemeManager.Get("Node_Disabled"))
 			node.audio_node.set_volume(0)
 			self.update_audio()
 
@@ -643,5 +643,6 @@ class MapCanvas(tk.Canvas):
 		for node in self.nodes:
 			self.itemconfig(node.circle, outline=ThemeManager.Get("Node_Circle"))
 			self.itemconfig(node.link_line, fill=ThemeManager.Get("Link_Line"))
-			self.itemconfig(node.node, fill=ThemeManager.Get("Accent"))
 			self.itemconfig(node.text, fill=ThemeManager.Get("Text"))
+			node_color = ThemeManager.Get("Node") if node.audio_node.enabled else ThemeManager.Get("Node_Disabled")
+			self.itemconfig(node.node, fill=node_color)

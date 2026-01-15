@@ -1,13 +1,15 @@
 {
 	"name": "Squirrelsong",
 	"colors": {
-		"Accent": "#527b98",
+		"Accent": "#468173",
 		"BG_Dark": "#fdfdfe",
 		"BG_Panel": "#f7f6f9",
-		"Close_Red": "#f0a8c2",
+		"Close_Red": "#d67e76",
 		"Grid_Color": "#e8e5eb",
-		"Link_Line": "#9bae7e",
-		"Node_Circle": "#80a4be",
+		"Link_Line": "#bfd1de",
+		"Node": "#5f9b8d",
+		"Node_Circle": "#adccc5",
+		"Node_Disabled": "#d6e6e2",
 		"Text": "#4c4b4e",
 		"Text_Ghost": "#78737d"
 	}
