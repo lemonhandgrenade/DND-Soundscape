@@ -12,6 +12,9 @@ output/
 # Options
 options.json
 
+# Rider
+.idea/*
+
 # Distribution / packaging
 .Python
 build/
