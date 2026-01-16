@@ -83,7 +83,7 @@ class EditTab(tk.Frame):
 		content.columnconfigure(0, weight=1)
 		content.columnconfigure(1, weight=0)
 
-		audio_playstyle, audio_loops = self.map_tab.canvas.get_audio_settings_for_file(file_path)
+		audio_playstyle, audio_loops = OptionsManager.GetAudioSettings(file_path)
 
 		# Playstyle
 		ttk.Label(content, text="Playstyle", style="Edit.TLabel", background=ThemeManager.Get("BG_Dark")).grid(row=0, column=0, sticky="w", padx=6, pady=4)

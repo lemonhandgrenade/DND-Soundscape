@@ -634,14 +634,6 @@ class MapCanvas(tk.Canvas):
 
 		self.update_audio()
 
-	def get_audio_settings_for_file(self, file_path):
-		for node in self.nodes:
-			if node.audio_node.file_path == file_path:
-				audio = node.audio_node
-				return audio.playstyle, audio.loops
-
-		return "loop_forever", -1
-
 	def update_theme(self):
 		self.update_debug_info()
 		self.configure(bg=ThemeManager.Get("BG_Dark"))

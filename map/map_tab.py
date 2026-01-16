@@ -283,8 +283,9 @@ class MapTab(tk.Frame):
 				audio = AudioNode(file, True)
 
 				audio.enabled = node_data.get("enabled", True)
-				audio.playstyle = node_data.get("playstyle", PlayStyle.LOOP_FOREVER)
-				audio.loops = node_data.get("loops", -1)
+				playstyle, loops = OptionsManager.GetAudioSettings(file)
+				audio.playstyle = playstyle
+				audio.loops = loops
 
 				node = MapNode(
 					self.canvas,

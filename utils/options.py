@@ -39,7 +39,7 @@ class OptionsManager:
 			return
 
 		with open(OPTIONS_FILE, "w", encoding="utf-8") as f:
-			json.dump(cls._options, f, indent=2)
+			json.dump(cls._options, f, indent='\t')
 
 	@classmethod
 	def Get(cls, key: str) -> str | bool:
