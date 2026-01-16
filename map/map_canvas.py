@@ -486,10 +486,10 @@ class MapCanvas(tk.Canvas):
 	def on_zoom(self, event):
 		self.focus_set()
 
-		factor = 1.1 if event.delta > 0 else 1 / 1.1
+		factor = .1 if event.delta > 0 else -.1
 
 		old_scale = self.scale_factor
-		new_scale = old_scale * factor
+		new_scale = old_scale + factor
 		new_scale = max(0.2, min(3.0, new_scale))
 
 		factor = new_scale / old_scale
