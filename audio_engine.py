@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from os import environ
 
 from enums import PlayStyle
+from utils.options import OptionsManager
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
 import pygame
@@ -16,7 +17,11 @@ _SOUND_FUTURES = {}
 _sound_executor = ThreadPoolExecutor(max_workers=2)
 
 def _load_sound_sync(path):
-	return pygame.mixer.Sound(path)
+	if path in _SOUND_CACHE:
+		return _SOUND_CACHE[path]
+	sound = pygame.mixer.Sound(path)
+	_SOUND_CACHE[path] = sound
+	return _SOUND_CACHE[path]
 
 def load_sound_async(path):
 	if path in _SOUND_CACHE:
@@ -39,8 +44,11 @@ class AudioNode:
 		self.file_path = file_path
 		self.enabled = True
 
-		self.playstyle = PlayStyle.LOOP_FOREVER
-		self.loops = -1
+		loop_behaviour, des_loops = OptionsManager.GetAudioSettings(file_path)
+		print(f"{file_path}: {loop_behaviour}, {des_loops}")
+
+		self.playstyle = loop_behaviour
+		self.loops = des_loops
 
 		self.sound = None
 		self.channel = pygame.mixer.find_channel(True)
@@ -49,16 +57,12 @@ class AudioNode:
 		self.update(is_file_load)
 
 	def update(self, is_file_load=False):
-		if self.sound is None:
-			if is_file_load:
-				self.sound = _load_sound_sync(self.file_path)
-			else:
-				self.sound = load_sound_async(self.file_path)
-
-		if self.playstyle == PlayStyle.LOOP_FOREVER:
-			self.play()
+		if is_file_load:
+			self.sound = _load_sound_sync(self.file_path)
 		else:
-			self.stop()
+			self.sound = load_sound_async(self.file_path)
+
+		self.play()
 
 	def play(self):
 		if not self.sound or not self.channel:

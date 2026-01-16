@@ -130,14 +130,14 @@ class EditTab(tk.Frame):
 		def apply_changes(event):
 			clear_focus(event)
 
+			loop_type = PlayStyle.LOOP_FOREVER if playstyle.get() == "Loop Forever" else PlayStyle.CURSOR_ENTER
+			loop_count = int(loops.get())
+			OptionsManager.SetAudioSettings(file_path, loop_type, loop_count)
+
 			for node in self.map_tab.canvas.nodes:
 				if node.audio_node.file_path == file_path:
-					node.audio_node.playstyle = (
-						PlayStyle.LOOP_FOREVER
-						if playstyle.get() == "Loop Forever"
-						else PlayStyle.CURSOR_ENTER
-					)
-					node.audio_node.loops = int(loops.get())
+					node.audio_node.playstyle = loop_type
+					node.audio_node.loops = loop_count
 
 		def clear_focus(event):
 			event.widget.selection_clear()

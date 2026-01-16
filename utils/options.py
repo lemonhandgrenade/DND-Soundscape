@@ -7,7 +7,8 @@ DEFAULT_OPTIONS = {
 	"snap_to_grid": True,
 	"glide_mode": "linear",
 	"simple_ui": False,
-	"theme": "Default"
+	"theme": "Default",
+	"files": {}
 }
 
 class OptionsManager:
@@ -61,4 +62,28 @@ class OptionsManager:
 			value (str): The Value Of The Option
 		"""
 		cls._load()[key] = value
+		cls._save()
+
+	@classmethod
+	def GetAudioSettings(cls, file_path: str) -> str | bool:
+		"""Returns An Persistent Option Value
+
+		Args:
+			file_path (str): The File Path Of The Option
+
+		Returns:
+			str|bool: The Gotten Value / Default Fallback
+		"""
+		return cls._load()["files"].get(file_path, ["loop_forever", -1])
+
+	@classmethod
+	def SetAudioSettings(cls, file_path: str, value: str, loops: int):
+		"""Save The Option Of Key With A Given Value
+
+		Args:
+			file_path (str): The File Path To Set
+			value (str): The Loop Behaviour Of The Option
+			loops (int): The Loops Of The Audio
+		"""
+		cls._load()["files"][file_path] = [value, loops]
 		cls._save()
