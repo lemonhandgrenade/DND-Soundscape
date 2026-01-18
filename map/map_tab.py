@@ -280,7 +280,7 @@ class MapTab(tk.Frame):
 				if file not in shared_files:
 					shared_files.append(file)
 
-				audio = AudioNode(file, True)
+				audio = AudioNode(file, node_data["playstyle"], node_data["loops"], True)
 
 				audio.enabled = node_data.get("enabled", True)
 				playstyle, loops = OptionsManager.GetAudioSettings(file)

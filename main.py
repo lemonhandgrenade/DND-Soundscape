@@ -147,7 +147,9 @@ class App(tk.Tk):
 		tabs = ttk.Notebook(self, style="TNotebook")
 		self.map_tab = MapTab(tabs, self.loaded_files)
 		self.load_tab = LoadTab(tabs, self.loaded_files, self.remove_file, self.refresh)
-		self.edit_tab = EditTab(tabs, self.loaded_files, self.map_tab)
+		
+		self.tabs = tabs
+		self.edit_tab = EditTab(tabs, self.map_tab)
 
 		tabs.add(self.load_tab, text="Load")
 		tabs.add(self.map_tab, text="Map")

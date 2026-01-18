@@ -1,5 +1,9 @@
 import tkinter as tk
 import math
+
+import itertools
+_node_itr = itertools.count(1)
+
 import numpy as np
 from audio_engine import AudioNode, PlayStyle
 from enums import GlideMode
@@ -10,6 +14,7 @@ class MapNode:
 		self.canvas = canvas
 		self.audio_node = audio_node
 		self.radius = radius
+		self.id = next(_node_itr)
 
 		self.real_x = x
 		self.offset_x = 0
@@ -47,7 +52,7 @@ class MapNode:
 		filename = self.audio_node.file_path.split("/")[-1]
 		self.text = self.canvas.create_text(
 			x + 8, y,
-			text=f"{filename}\nVol: 0.00",
+			text=f"#{self.id} {filename}\nVol: 0.00",
 			anchor="w",
 			fill=ThemeManager.Get("Text"),
 			font=("Segoe UI", 9)
@@ -204,8 +209,9 @@ class MapCanvas(tk.Canvas):
 		return min(magic, 2) / scalar
 
 	def _refocus_nodes(self):
-		coords_min = np.array([1000000000.0, 1000000000.0])
-		coords_max = np.array([-1000000000.0, -1000000000.0])
+		big_num = 1000000000.0
+		coords_min = np.array([big_num, big_num])
+		coords_max = np.array([-big_num, -big_num])
 		for node in self.nodes:
 			cx, cy = node.center()
 			coord = np.array([cx,cy])							# Get Pos Without Panning / Zooming
@@ -225,11 +231,21 @@ class MapCanvas(tk.Canvas):
 		self.offset_x = -offset_x + (self.winfo_width() / 2)
 		self.offset_y = -offset_y + (self.winfo_height() / 2)
 
-	def _refocus_nodeless(self):
+	def focus_node(self, node: MapNode):
 		self.set_zoom(1)
 
-		offset_x = 0.0
-		offset_y = 0.0
+		offset_x = -node.real_x
+		offset_y = -node.real_y
+
+		self.offset_x = offset_x + (self.winfo_width() / 2)
+		self.offset_y = offset_y + (self.winfo_height() / 2)
+
+		self.pan_start = (0, 0)
+		self.update_all_positions()
+		self.update_debug_info()
+
+	def _refocus_nodeless(self):
+		self.set_zoom(1)
 
 		offset_x = -self.cursor_x
 		offset_y = -self.cursor_y
@@ -256,14 +272,23 @@ class MapCanvas(tk.Canvas):
 			enabled (bool): Whether The Clicked Node Is Enabled
 		"""
 		self.node_menu.delete(0, "end")
-		self.node_menu.add_command(label="Radius", command=self.adjust_node_radius)
+		self.node_menu.add_command(label="Edit Node", command=self.edit_node)
 		self.node_menu.add_separator()
+		self.node_menu.add_command(label="Radius", command=self.adjust_node_radius)
 		if not enabled:
 			self.node_menu.add_command(label="Enable", command=self.enable_node)
 		else:
 			self.node_menu.add_command(label="Disable", command=self.disable_node)
 		self.node_menu.add_separator()
 		self.node_menu.add_command(label="Delete", command=self.delete_node)
+
+	def edit_node(self):
+		if not self.right_clicked_node:
+			return
+
+		main = self.winfo_toplevel()
+		main.edit_tab.open_node(self.right_clicked_node)
+		main.tabs.select(main.edit_tab)
 
 	def move_cursor(self, x: float, y: float):
 		"""Sets The Target Of For The Cursor To Interp/Snap To
@@ -395,18 +420,19 @@ class MapCanvas(tk.Canvas):
 					audio.play()
 				elif vol == 0 and audio.is_playing:
 					audio.stop()
+			elif audio.playstyle == PlayStyle.LOOP_FOREVER:
+				if vol > 0 and not audio.is_playing:
+					audio.play()
 
 			audio.set_volume(vol)
 
-
-			filename = node.audio_node.file_path.split("/")[-1]
-			self.itemconfig(node.text, text=self.get_node_text(filename, vol))
+			self.itemconfig(node.text, text=self.get_node_text(node, vol))
 			if vol > 0:
 				self.itemconfig(node.text, fill=ThemeManager.Get("Text"))
 			else:
 				self.itemconfig(node.text, fill=ThemeManager.Get("Text_Ghost"))
 
-	def get_node_text(self, filename: str, vol: float) -> str:
+	def get_node_text(self, node: MapNode, vol: float) -> str:
 		"""Creates And Returns The Text To The Right Of The Node
 
 		Args:
@@ -416,14 +442,16 @@ class MapCanvas(tk.Canvas):
 		Returns:
 			str: Formatted String Of Node Info
 		"""
+		filename = node.audio_node.file_path.split("/")[-1]
+
 		if self.is_simple.get():
 			volume = int(vol * 100)
-			return f"{filename}\nVolume: {volume}"
+			return f"#{node.id} {filename}\nVolume: {volume}"
 		else:
 			width = 24
 			bars = '|' * math.ceil(vol * width)
 			bars = bars.ljust(width)
-			return f"{filename}\n[{bars}]"
+			return f"#{node.id} {filename}\n[{bars}]"
 
 	def get_cursor_center(self):
 		x1, y1, x2, y2 = self.coords(self.cursor)

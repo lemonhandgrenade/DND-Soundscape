@@ -40,15 +40,12 @@ def load_sound_async(path):
 	return None
 
 class AudioNode:
-	def __init__(self, file_path, is_file_load=False):
+	def __init__(self, file_path, loop_behaviour = PlayStyle.LOOP_FOREVER, loops = -1, is_file_load=False):
 		self.file_path = file_path
 		self.enabled = True
 
-		loop_behaviour, des_loops = OptionsManager.GetAudioSettings(file_path)
-		print(f"{file_path}: {loop_behaviour}, {des_loops}")
-
 		self.playstyle = loop_behaviour
-		self.loops = des_loops
+		self.loops = loops
 
 		self.sound = None
 		self.channel = pygame.mixer.find_channel(True)
